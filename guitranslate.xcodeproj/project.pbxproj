@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,13 +14,12 @@
 		BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802529D5E32600C8686A /* AudioSpectrogram.swift */; };
 		BE74802829D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */; };
 		BE74802A29D7051900C8686A /* MelSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802929D7051900C8686A /* MelSpectrogram.swift */; };
-		F28A9E472BF9D13600894570 /* CountdownTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28A9E462BF9D13600894570 /* CountdownTimerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		61B27D4DF2C017C525F12011 /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		B05426070169D7858B022BFE /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-		BE74801429D5DFA900C8686A /* AudioSpectrogram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioSpectrogram.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE74801429D5DFA900C8686A /* Guitranslate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Guitranslate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE74801629D5DFA900C8686A /* GuitranslateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuitranslateApp.swift; sourceTree = "<group>"; };
 		BE74801829D5DFA900C8686A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BE74801A29D5DFAB00C8686A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -29,8 +28,6 @@
 		BE74802529D5E32600C8686A /* AudioSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSpectrogram.swift; sourceTree = "<group>"; };
 		BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift"; sourceTree = "<group>"; };
 		BE74802929D7051900C8686A /* MelSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MelSpectrogram.swift; sourceTree = "<group>"; };
-		C5A7A3B976288CC302EA224C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		F28A9E462BF9D13600894570 /* CountdownTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,7 +44,6 @@
 		3EDCF0C22372EFE600637FFF = {
 			isa = PBXGroup;
 			children = (
-				C5A7A3B976288CC302EA224C /* README.md */,
 				BE74801529D5DFA900C8686A /* AudioSpectrogram */,
 				3EDCF0CC2372EFE600637FFF /* Products */,
 				B1394AA10D860BC3E367A1A3 /* Configuration */,
@@ -58,7 +54,7 @@
 		3EDCF0CC2372EFE600637FFF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BE74801429D5DFA900C8686A /* AudioSpectrogram.app */,
+				BE74801429D5DFA900C8686A /* Guitranslate.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -90,7 +86,6 @@
 				BE74801A29D5DFAB00C8686A /* Assets.xcassets */,
 				BE74801F29D5DFAB00C8686A /* AudioSpectrogram.entitlements */,
 				BE74801C29D5DFAB00C8686A /* Preview Content */,
-				F28A9E462BF9D13600894570 /* CountdownTimerView.swift */,
 			);
 			path = AudioSpectrogram;
 			sourceTree = "<group>";
@@ -106,9 +101,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BE74801329D5DFA900C8686A /* AudioSpectrogram */ = {
+		BE74801329D5DFA900C8686A /* Guitranslate */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BE74802229D5DFAB00C8686A /* Build configuration list for PBXNativeTarget "AudioSpectrogram" */;
+			buildConfigurationList = BE74802229D5DFAB00C8686A /* Build configuration list for PBXNativeTarget "Guitranslate" */;
 			buildPhases = (
 				BE74801029D5DFA900C8686A /* Sources */,
 				BE74801129D5DFA900C8686A /* Frameworks */,
@@ -118,9 +113,9 @@
 			);
 			dependencies = (
 			);
-			name = AudioSpectrogram;
+			name = Guitranslate;
 			productName = AudioSpectrogram;
-			productReference = BE74801429D5DFA900C8686A /* AudioSpectrogram.app */;
+			productReference = BE74801429D5DFA900C8686A /* Guitranslate.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -141,7 +136,7 @@
 				};
 			};
 			buildConfigurationList = 3EDCF0C62372EFE600637FFF /* Build configuration list for PBXProject "guitranslate" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -153,7 +148,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BE74801329D5DFA900C8686A /* AudioSpectrogram */,
+				BE74801329D5DFA900C8686A /* Guitranslate */,
 			);
 		};
 /* End PBXProject section */
@@ -177,7 +172,6 @@
 			files = (
 				BE74801929D5DFA900C8686A /* ContentView.swift in Sources */,
 				BE74802829D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift in Sources */,
-				F28A9E472BF9D13600894570 /* CountdownTimerView.swift in Sources */,
 				BE74802A29D7051900C8686A /* MelSpectrogram.swift in Sources */,
 				BE74801729D5DFA900C8686A /* GuitranslateApp.swift in Sources */,
 				BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */,
@@ -327,6 +321,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Guitranslate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Apple Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Analyse audio";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -336,7 +332,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.AudioSpectrogram${SAMPLE_CODE_DISAMBIGUATOR}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.camackenzie.guitranslate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -367,6 +363,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Guitranslate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Apple Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Analyse audio";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -376,7 +374,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.AudioSpectrogram${SAMPLE_CODE_DISAMBIGUATOR}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.camackenzie.guitranslate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
@@ -398,7 +396,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BE74802229D5DFAB00C8686A /* Build configuration list for PBXNativeTarget "AudioSpectrogram" */ = {
+		BE74802229D5DFAB00C8686A /* Build configuration list for PBXNativeTarget "Guitranslate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BE74802029D5DFAB00C8686A /* Debug */,

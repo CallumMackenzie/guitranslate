@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "BE74801329D5DFA900C8686A"
-               BuildableName = "AudioSpectrogram.app"
-               BlueprintName = "AudioSpectrogram"
+               BuildableName = "Guitranslate.app"
+               BlueprintName = "Guitranslate"
                ReferencedContainer = "container:guitranslate.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BE74801329D5DFA900C8686A"
-            BuildableName = "AudioSpectrogram.app"
-            BlueprintName = "AudioSpectrogram"
+            BuildableName = "Guitranslate.app"
+            BlueprintName = "Guitranslate"
             ReferencedContainer = "container:guitranslate.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "BE74801329D5DFA900C8686A"
-            BuildableName = "AudioSpectrogram.app"
-            BlueprintName = "AudioSpectrogram"
+            BuildableName = "Guitranslate.app"
+            BlueprintName = "Guitranslate"
             ReferencedContainer = "container:guitranslate.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
