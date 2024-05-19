@@ -8,6 +8,7 @@ The class that provides a signal that represents a drum loop.
 import Accelerate
 import Combine
 import AVFoundation
+import UIKit
 
 class AudioSpectrogram: NSObject, ObservableObject {
     
@@ -19,10 +20,10 @@ class AudioSpectrogram: NSObject, ObservableObject {
         var id: Self { self }
     }
     
-    @Published var mode = Mode.linear
+    @Published var mode = Mode.mel
     
-    @Published var gain: Double = 0.025
-    @Published var zeroReference: Double = 1000
+    @Published var gain: Double = 0.038
+    @Published var zeroReference: Double = 550
     
     @Published var outputImage = AudioSpectrogram.emptyCGImage
     
@@ -34,6 +35,7 @@ class AudioSpectrogram: NSObject, ObservableObject {
         configureCaptureSession()
         audioOutput.setSampleBufferDelegate(self,
                                             queue: captureQueue)
+        
     }
     
     required init?(coder: NSCoder) {
@@ -151,6 +153,8 @@ class AudioSpectrogram: NSObject, ObservableObject {
         
         switch mode {
             case .linear:
+                
+            
                 vDSP.convert(amplitude: frequencyDomainBuffer,
                              toDecibels: &frequencyDomainBuffer,
                              zeroReference: Float(zeroReference))
@@ -196,9 +200,8 @@ class AudioSpectrogram: NSObject, ObservableObject {
         
         return rgbImageBuffer.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
     }
+    
 }
-
-import Cocoa
 
 // MARK: Utility functions
 extension AudioSpectrogram {
@@ -231,7 +234,7 @@ extension AudioSpectrogram {
                 let hue = 0.6666 - (0.6666 * normalizedValue)
                 let brightness = sqrt(normalizedValue)
                 
-                let color = NSColor(hue: hue,
+                let color = UIColor(hue: hue,
                                     saturation: 1,
                                     brightness: brightness,
                                     alpha: 1)

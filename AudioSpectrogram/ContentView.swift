@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     @EnvironmentObject var audioSpectrogram: AudioSpectrogram
+    @State var recording = false
     
     var body: some View {
         
@@ -21,27 +22,32 @@ struct ContentView: View {
             .resizable()
             
             HStack {
-                Text("Gain")
-                Slider(value: $audioSpectrogram.gain,
-                       in: 0.01 ... 0.04)
-                
-                Divider().frame(height: 40)
-                
-                Text("Zero Ref")
-                Slider(value: $audioSpectrogram.zeroReference,
-                       in: 10 ... 2500)
-                
-                Divider().frame(height: 40)
-                
-                Picker("Mode", selection: $audioSpectrogram.mode) {
-                    ForEach(AudioSpectrogram.Mode.allCases) { mode in
-                        Text(mode.rawValue.capitalized)
-                    }
+                Button(recording ? "Stop Recording" : "Record") {
+                    recording = !recording
+                    audioSpectrogram.setRunning(run: recording)
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                Button("Training Mode") {
+                    
+                }
             }
-            .padding()
+            
+//            HStack {
+//                VStack {
+//                    Text("Gain")
+//                    Slider(value: $audioSpectrogram.gain,
+//                           in: 0.01 ... 0.04)
+//                    Text("\($audioSpectrogram.gain.wrappedValue)")
+//                }
+//                Divider().frame(height: 40)
+//                
+//                VStack {
+//                    Text("Zero Ref")
+//                    Slider(value: $audioSpectrogram.zeroReference,
+//                           in: 10 ... 2500)
+//                    Text("\($audioSpectrogram.zeroReference.wrappedValue)")
+//                }
+//            }
+//            .padding()
         }
     }
 }

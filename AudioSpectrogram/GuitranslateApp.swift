@@ -7,23 +7,16 @@ The audio spectrogram app file.
 import SwiftUI
 
 @main
-struct AudioSpectrogramApp: App {
+struct GuitranslateApp: App {
     
     @Environment(\.scenePhase) private var scenePhase
     
     let audioSpectrogram = AudioSpectrogram()
-    
+  
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(audioSpectrogram)
-                .onChange(of: scenePhase) { phase in
-                    if phase == .active {
-                        Task(priority: .userInitiated) {
-                            audioSpectrogram.startRunning()
-                        }
-                    }
-                }
         }
     }
 }

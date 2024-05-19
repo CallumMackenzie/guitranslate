@@ -69,7 +69,6 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
             self.rawAudioData.removeFirst(AudioSpectrogram.hopCount)
             self.processData(values: dataToProcess)
         }
-
         DispatchQueue.main.async { [self] in
             outputImage = makeAudioSpectrogramImage()
         }
@@ -141,10 +140,14 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
     }
     
     /// Starts the audio spectrogram.
-    func startRunning() {
+    func setRunning(run: Bool) {
         sessionQueue.async {
             if AVCaptureDevice.authorizationStatus(for: .audio) == .authorized {
-                self.captureSession.startRunning()
+                if (run) {
+                    self.captureSession.startRunning()
+                } else {
+                    self.captureSession.stopRunning()
+                }
             }
         }
     }

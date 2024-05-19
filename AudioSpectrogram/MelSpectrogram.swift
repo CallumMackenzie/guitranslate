@@ -12,7 +12,7 @@ class MelSpectrogram {
     let sampleCount: Int
     
     /// The number of mel filter banks  — the height of the spectrogram.
-    static let filterBankCount = 40
+    static let filterBankCount = 1024
 
     /// A matrix of `filterBankCount` rows and `sampleCount` that contain the triangular overlapping
     /// windows for each mel frequency.
@@ -26,7 +26,7 @@ class MelSpectrogram {
         self.sampleCount = sampleCount
         
         filterBank = MelSpectrogram.makeFilterBank(
-            withFrequencyRange: 20 ... 20_000,
+            withFrequencyRange: 75 ... 5_000,// 20 ... 20_000,
             sampleCount: sampleCount,
             filterBankCount: MelSpectrogram.filterBankCount)
         
@@ -79,11 +79,19 @@ class MelSpectrogram {
         
         /// Use linear interpolation to "stretch" the mulitplication result in `sgemmResult` to the number
         /// of elements in `values`.
-        let indices = vDSP.ramp(in: 0 ... Float(sampleCount),
-                                count: sgemmResult.count)
-        vDSP.linearInterpolate(values: sgemmResult,
-                               atIndices: indices,
-                               result: &values)
+//        let indices = vDSP.ramp(in: 0 ... Float(sampleCount),
+//                                count: sgemmResult.count)
+//        vDSP.linearInterpolate(values: sgemmResult,
+//                               atIndices: indices,
+//                               result: &values)
+        if sgemmResult.count != values.count {
+            fatalError("Counts do not match: sgemmResult \(sgemmResult.count), values: \(values.count)")
+        }
+        cblas_scopy(Int32(values.count), 
+                    sgemmResult.baseAddress,
+                    1,
+                    &values,
+                    1)
     }
     
     /// Populates the specified `filterBank` with a matrix of overlapping triangular windows.
