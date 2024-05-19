@@ -14,6 +14,7 @@
 		BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802529D5E32600C8686A /* AudioSpectrogram.swift */; };
 		BE74802829D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */; };
 		BE74802A29D7051900C8686A /* MelSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802929D7051900C8686A /* MelSpectrogram.swift */; };
+		F28A9E4B2BFABC1100894570 /* SpectrogramRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		BE74802529D5E32600C8686A /* AudioSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSpectrogram.swift; sourceTree = "<group>"; };
 		BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift"; sourceTree = "<group>"; };
 		BE74802929D7051900C8686A /* MelSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MelSpectrogram.swift; sourceTree = "<group>"; };
+		F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrogramRecordingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 				BE74801A29D5DFAB00C8686A /* Assets.xcassets */,
 				BE74801F29D5DFAB00C8686A /* AudioSpectrogram.entitlements */,
 				BE74801C29D5DFAB00C8686A /* Preview Content */,
+				F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */,
 			);
 			path = AudioSpectrogram;
 			sourceTree = "<group>";
@@ -174,6 +177,7 @@
 				BE74802829D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift in Sources */,
 				BE74802A29D7051900C8686A /* MelSpectrogram.swift in Sources */,
 				BE74801729D5DFA900C8686A /* GuitranslateApp.swift in Sources */,
+				F28A9E4B2BFABC1100894570 /* SpectrogramRecordingView.swift in Sources */,
 				BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

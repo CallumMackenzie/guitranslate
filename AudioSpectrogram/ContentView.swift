@@ -10,44 +10,19 @@ import SwiftUI
 struct ContentView: View {
     
     @EnvironmentObject var audioSpectrogram: AudioSpectrogram
-    @State var recording = false
+    @State var training = false
     
     var body: some View {
         
         VStack {
-            
-            Image(decorative: audioSpectrogram.outputImage,
-                  scale: 1,
-                  orientation: .left)
-            .resizable()
+            SpectrogramRecordingView()
+                .environmentObject(audioSpectrogram)
             
             HStack {
-                Button(recording ? "Stop Recording" : "Record") {
-                    recording = !recording
-                    audioSpectrogram.setRunning(run: recording)
-                }
-                Button("Training Mode") {
-                    
+                Button(training ? "Exit Training Mode" : "Training Mode") {
+                    training = !training
                 }
             }
-            
-//            HStack {
-//                VStack {
-//                    Text("Gain")
-//                    Slider(value: $audioSpectrogram.gain,
-//                           in: 0.01 ... 0.04)
-//                    Text("\($audioSpectrogram.gain.wrappedValue)")
-//                }
-//                Divider().frame(height: 40)
-//                
-//                VStack {
-//                    Text("Zero Ref")
-//                    Slider(value: $audioSpectrogram.zeroReference,
-//                           in: 10 ... 2500)
-//                    Text("\($audioSpectrogram.zeroReference.wrappedValue)")
-//                }
-//            }
-//            .padding()
         }
     }
 }
