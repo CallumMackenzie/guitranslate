@@ -70,7 +70,7 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
             self.processData(values: dataToProcess)
         }
         DispatchQueue.main.async { [self] in
-            outputImage = makeAudioSpectrogramImage()
+            outputImage = makePreviewAudioSpectrogramImage()
         }
     }
     

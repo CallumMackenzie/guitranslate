@@ -1,9 +1,9 @@
 /*
-See the LICENSE.txt file for this sample’s licensing information.
-
-Abstract:
-The class that provides a signal that represents a drum loop.
-*/
+ See the LICENSE.txt file for this sample’s licensing information.
+ 
+ Abstract:
+ The class that provides a signal that represents a drum loop.
+ */
 
 import Accelerate
 import Combine
@@ -54,7 +54,7 @@ class AudioSpectrogram: NSObject, ObservableObject {
     
     /// Determines the overlap between frames.
     static let hopCount = 512
-
+    
     let captureSession = AVCaptureSession()
     let audioOutput = AVCaptureAudioDataOutput()
     let captureQueue = DispatchQueue(label: "captureQueue",
@@ -88,7 +88,9 @@ class AudioSpectrogram: NSObject, ObservableObject {
     /// Raw frequency-domain values.
     var frequencyDomainValues = [Float](repeating: 0,
                                         count: bufferCount * sampleCount)
-        
+    
+    var frequencyDomainOffset = 0
+    
     var rgbImageFormat = vImage_CGImageFormat(
         bitsPerComponent: 32,
         bitsPerPixel: 32 * 3,
@@ -98,25 +100,26 @@ class AudioSpectrogram: NSObject, ObservableObject {
             CGBitmapInfo.floatComponents.rawValue |
             CGImageAlphaInfo.none.rawValue))!
     
+    
     /// RGB vImage buffer that contains a vertical representation of the audio spectrogram.
     
     let redBuffer = vImage.PixelBuffer<vImage.PlanarF>(
-            width: AudioSpectrogram.sampleCount,
-            height: AudioSpectrogram.bufferCount)
-
-    let greenBuffer = vImage.PixelBuffer<vImage.PlanarF>(
-            width: AudioSpectrogram.sampleCount,
-            height: AudioSpectrogram.bufferCount)
-    
-    let blueBuffer = vImage.PixelBuffer<vImage.PlanarF>(
-            width: AudioSpectrogram.sampleCount,
-            height: AudioSpectrogram.bufferCount)
-    
-    let rgbImageBuffer = vImage.PixelBuffer<vImage.InterleavedFx3>(
         width: AudioSpectrogram.sampleCount,
         height: AudioSpectrogram.bufferCount)
-
-
+    
+    let greenBuffer = vImage.PixelBuffer<vImage.PlanarF>(
+        width: AudioSpectrogram.sampleCount,
+        height: AudioSpectrogram.bufferCount)
+    
+    let blueBuffer = vImage.PixelBuffer<vImage.PlanarF>(
+        width: AudioSpectrogram.sampleCount,
+        height: AudioSpectrogram.bufferCount)
+    
+    var rgbImageBuffer = vImage.PixelBuffer<vImage.InterleavedFx3>(
+        width: AudioSpectrogram.sampleCount,
+        height: AudioSpectrogram.bufferCount)
+    
+    
     /// A reusable array that contains the current frame of time-domain audio data as single-precision
     /// values.
     var timeDomainBuffer = [Float](repeating: 0,
@@ -128,7 +131,7 @@ class AudioSpectrogram: NSObject, ObservableObject {
                                         count: sampleCount)
     
     // MARK: Instance Methods
-        
+    
     /// Process a frame of raw audio data.
     ///
     /// * Convert supplied `Int16` values to single-precision and write the result to `timeDomainBuffer`.
@@ -152,38 +155,40 @@ class AudioSpectrogram: NSObject, ObservableObject {
                       result: &frequencyDomainBuffer)
         
         switch mode {
-            case .linear:
-                
+        case .linear:
             
-                vDSP.convert(amplitude: frequencyDomainBuffer,
-                             toDecibels: &frequencyDomainBuffer,
-                             zeroReference: Float(zeroReference))
-            case .mel:
-                melSpectrogram.computeMelSpectrogram(
-                    values: &frequencyDomainBuffer)
-                
-                vDSP.convert(power: frequencyDomainBuffer,
-                             toDecibels: &frequencyDomainBuffer,
-                             zeroReference: Float(zeroReference))
+            
+            vDSP.convert(amplitude: frequencyDomainBuffer,
+                         toDecibels: &frequencyDomainBuffer,
+                         zeroReference: Float(zeroReference))
+        case .mel:
+            melSpectrogram.computeMelSpectrogram(
+                values: &frequencyDomainBuffer)
+            
+            vDSP.convert(power: frequencyDomainBuffer,
+                         toDecibels: &frequencyDomainBuffer,
+                         zeroReference: Float(zeroReference))
         }
-
+        
         vDSP.multiply(Float(gain),
                       frequencyDomainBuffer,
                       result: &frequencyDomainBuffer)
         
         if frequencyDomainValues.count > AudioSpectrogram.sampleCount {
-            frequencyDomainValues.removeFirst(AudioSpectrogram.sampleCount)
+            //                        frequencyDomainValues.removeFirst(AudioSpectrogram.sampleCount)
+            frequencyDomainOffset += AudioSpectrogram.sampleCount
         }
         
         frequencyDomainValues.append(contentsOf: frequencyDomainBuffer)
     }
     
     /// Creates an audio spectrogram `CGImage` from `frequencyDomainValues`.
-    func makeAudioSpectrogramImage() -> CGImage {
+    func makePreviewAudioSpectrogramImage() -> CGImage {
+        
         frequencyDomainValues.withUnsafeMutableBufferPointer {
             
             let planarImageBuffer = vImage.PixelBuffer(
-                data: $0.baseAddress!,
+                data: $0.baseAddress! + frequencyDomainOffset,
                 width: AudioSpectrogram.sampleCount,
                 height: AudioSpectrogram.bufferCount,
                 byteCountPerRow: AudioSpectrogram.sampleCount * MemoryLayout<Float>.stride,
@@ -194,11 +199,57 @@ class AudioSpectrogram: NSObject, ObservableObject {
                 destinations: [redBuffer, greenBuffer, blueBuffer],
                 interpolation: .half)
             
-            rgbImageBuffer.interleave(
-                planarSourceBuffers: [redBuffer, greenBuffer, blueBuffer])
         }
         
+        rgbImageBuffer.interleave(planarSourceBuffers: [redBuffer, greenBuffer, blueBuffer])
+        
         return rgbImageBuffer.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
+    }
+    
+    func makeFullAudioSpectrogramImage() -> CGImage {
+        return frequencyDomainValues.withUnsafeMutableBufferPointer {
+            
+            let buffCnt = $0.count / AudioSpectrogram.sampleCount - AudioSpectrogram.bufferCount
+            
+            let redBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let greenBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let blueBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let rgbImageBufferLarge = vImage.PixelBuffer<vImage.InterleavedFx3>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let planarImageBuffer = vImage.PixelBuffer(
+                data: $0.baseAddress! + AudioSpectrogram.bufferCount * AudioSpectrogram.sampleCount,
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt,
+                byteCountPerRow: AudioSpectrogram.sampleCount * MemoryLayout<Float>.stride,
+                pixelFormat: vImage.PlanarF.self)
+            
+            AudioSpectrogram.multidimensionalLookupTable.apply(
+                sources: [planarImageBuffer],
+                destinations: [redBufferLarge, greenBufferLarge, blueBufferLarge],
+                interpolation: .half)
+            
+            rgbImageBufferLarge.interleave(planarSourceBuffers: [redBufferLarge, greenBufferLarge, blueBufferLarge])
+            
+            return rgbImageBufferLarge.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
+        }
+    }
+    
+    func clear() {
+        frequencyDomainOffset = 0
+        frequencyDomainValues = [Float](repeating: 0,
+                                        count: AudioSpectrogram.bufferCount * AudioSpectrogram.sampleCount)
+        outputImage = AudioSpectrogram.emptyCGImage
     }
     
 }
@@ -229,7 +280,7 @@ extension AudioSpectrogram {
             for gray in ( 0 ..< entriesPerChannel) {
                 /// Create normalized red, green, and blue values in the range `0...1`.
                 let normalizedValue = CGFloat(gray) / CGFloat(entriesPerChannel - 1)
-              
+                
                 // Define `hue` that's blue at `0.0` to red at `1.0`.
                 let hue = 0.6666 - (0.6666 * normalizedValue)
                 let brightness = sqrt(normalizedValue)
@@ -247,7 +298,7 @@ extension AudioSpectrogram {
                              green: &green,
                              blue: &blue,
                              alpha: nil)
-     
+                
                 buffer[ bufferIndex ] = UInt16(green * multiplier)
                 bufferIndex += 1
                 buffer[ bufferIndex ] = UInt16(red * multiplier)
