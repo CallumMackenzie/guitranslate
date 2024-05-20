@@ -25,7 +25,9 @@ class AudioSpectrogram: NSObject, ObservableObject {
     @Published var gain: Double = 0.038
     @Published var zeroReference: Double = 550
     
-    @Published var outputImage = AudioSpectrogram.emptyCGImage
+    @Published var previewOutputImage = AudioSpectrogram.emptyCGImage
+    @Published var fullOutputImage = AudioSpectrogram.emptyCGImage
+    @Published var totalRecordingDuration = Duration.zero
     
     // MARK: Initialization
     
@@ -75,6 +77,10 @@ class AudioSpectrogram: NSObject, ObservableObject {
                                     isHalfWindow: false)
     
     let dispatchSemaphore = DispatchSemaphore(value: 1)
+    
+    /// For tracking duration of recordings
+    var currentRecordingSegmentDuration = Duration.zero
+    var lastRecordingStart: Date = Date.now
     
     /// The highest frequency that the app can represent.
     ///
@@ -175,11 +181,13 @@ class AudioSpectrogram: NSObject, ObservableObject {
                       result: &frequencyDomainBuffer)
         
         if frequencyDomainValues.count > AudioSpectrogram.sampleCount {
-            //                        frequencyDomainValues.removeFirst(AudioSpectrogram.sampleCount)
             frequencyDomainOffset += AudioSpectrogram.sampleCount
         }
         
         frequencyDomainValues.append(contentsOf: frequencyDomainBuffer)
+        DispatchQueue.main.async {
+            self.totalRecordingDuration = self.getRecordingDuration()
+        }
     }
     
     /// Creates an audio spectrogram `CGImage` from `frequencyDomainValues`.
@@ -206,8 +214,16 @@ class AudioSpectrogram: NSObject, ObservableObject {
         return rgbImageBuffer.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
     }
     
-    func makeFullAudioSpectrogramImage() -> CGImage {
+    func updateFullAudioSpectrogramImage() {
+        self.fullOutputImage = makeFullAudioSpectrogramImage()
+    }
+    
+    private func makeFullAudioSpectrogramImage() -> CGImage {
         return frequencyDomainValues.withUnsafeMutableBufferPointer {
+            
+            if self.totalRecordingDuration == Duration.zero {
+                return AudioSpectrogram.emptyCGImage
+            }
             
             let buffCnt = $0.count / AudioSpectrogram.sampleCount - AudioSpectrogram.bufferCount
             
@@ -249,7 +265,41 @@ class AudioSpectrogram: NSObject, ObservableObject {
         frequencyDomainOffset = 0
         frequencyDomainValues = [Float](repeating: 0,
                                         count: AudioSpectrogram.bufferCount * AudioSpectrogram.sampleCount)
-        outputImage = AudioSpectrogram.emptyCGImage
+        previewOutputImage = AudioSpectrogram.emptyCGImage
+        fullOutputImage = AudioSpectrogram.emptyCGImage
+        currentRecordingSegmentDuration = Duration.zero
+        totalRecordingDuration = Duration.zero
+    }
+    
+    /// Starts and stops the audio spectrogram.
+    func setRunning(run: Bool) {
+        sessionQueue.async {
+            if AVCaptureDevice.authorizationStatus(for: .audio) == .authorized {
+                if run {
+                    DispatchQueue.main.async {
+                        self.lastRecordingStart = Date.now
+                    }
+                    self.captureSession.startRunning()
+                } else  {
+                    DispatchQueue.main.async {
+                        self.currentRecordingSegmentDuration = self.getRecordingDuration()
+                        self.updateFullAudioSpectrogramImage()
+                    }
+                    self.captureSession.stopRunning()
+                }
+            }
+        }
+    }
+    
+    /// Returns current elapsed runtime
+    func getRecordingDuration() -> Duration {
+        if self.captureSession.isRunning {
+            let timeIntervalSinceLastRecordingStart = Date.now.timeIntervalSince(self.lastRecordingStart)
+            let durationSinceStartOfCurrentRecording = Duration.seconds(timeIntervalSinceLastRecordingStart)
+            return self.currentRecordingSegmentDuration + durationSinceStartOfCurrentRecording
+        } else {
+            return self.currentRecordingSegmentDuration
+        }
     }
     
 }

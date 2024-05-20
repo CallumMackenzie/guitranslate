@@ -13,23 +13,25 @@ struct SpectrogramRecordingView: View {
     
     @EnvironmentObject var audioSpectrogram: AudioSpectrogram
     @State var recording = false
-    @State var fullSpectrogramImage = AudioSpectrogram.emptyCGImage
     
     var body: some View {
         
         VStack {
             if (recording) {
-                Image(decorative: audioSpectrogram.outputImage,
+                Image(decorative: audioSpectrogram.previewOutputImage,
                       scale: 1,
                       orientation: .left)
                 .resizable()
             } else {
                 ScrollView(.horizontal) {
-                    Image(decorative: fullSpectrogramImage,
-                          scale: 1,
-                          orientation: .left)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    VStack {
+                        Image(decorative: audioSpectrogram.fullOutputImage,
+                              scale: 1,
+                              orientation: .left)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        TabEditorView()
+                    }
                 }.defaultScrollAnchor(.bottom)
             }
         }
@@ -41,18 +43,16 @@ struct SpectrogramRecordingView: View {
                maxHeight: .infinity,
                alignment: .center)
         
+        Text("\(audioSpectrogram.totalRecordingDuration.formatted())")
+        
         HStack {
             Button(recording ? "Stop Recording" : "Record") {
                 recording = !recording
                 audioSpectrogram.setRunning(run: recording)
-                if (!recording) {
-                    fullSpectrogramImage = audioSpectrogram.makeFullAudioSpectrogramImage()
-                }
             }
             
             Button("Clear") {
                 audioSpectrogram.clear()
-                fullSpectrogramImage = AudioSpectrogram.emptyCGImage
             }.disabled(recording)
         }
     }

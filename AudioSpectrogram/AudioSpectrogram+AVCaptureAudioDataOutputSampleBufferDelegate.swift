@@ -70,7 +70,7 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
             self.processData(values: dataToProcess)
         }
         DispatchQueue.main.async { [self] in
-            outputImage = makePreviewAudioSpectrogramImage()
+            previewOutputImage = makePreviewAudioSpectrogramImage()
         }
     }
     
@@ -125,7 +125,7 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
         }
 
         guard
-            let microphone = AVCaptureDevice.default(.builtInMicrophone,
+            let microphone = AVCaptureDevice.default(AVCaptureDevice.DeviceType.microphone,
                                                      for: .audio,
                                                      position: .unspecified),
             let microphoneInput = try? AVCaptureDeviceInput(device: microphone) else {
@@ -138,17 +138,6 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
 
         captureSession.commitConfiguration()
     }
-    
-    /// Starts the audio spectrogram.
-    func setRunning(run: Bool) {
-        sessionQueue.async {
-            if AVCaptureDevice.authorizationStatus(for: .audio) == .authorized {
-                if (run) {
-                    self.captureSession.startRunning()
-                } else {
-                    self.captureSession.stopRunning()
-                }
-            }
-        }
-    }
+ 
+
 }
