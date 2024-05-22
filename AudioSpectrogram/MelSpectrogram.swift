@@ -12,7 +12,7 @@ class MelSpectrogram {
     let sampleCount: Int
     
     /// The number of mel filter banks  — the height of the spectrogram.
-    static let filterBankCount = 1024
+    let filterBankCount: Int
 
     /// A matrix of `filterBankCount` rows and `sampleCount` that contain the triangular overlapping
     /// windows for each mel frequency.
@@ -22,15 +22,16 @@ class MelSpectrogram {
     /// `frequencyDomainBuffer` multiplied by the `filterBank` matrix.
     let sgemmResult: UnsafeMutableBufferPointer<Float>
     
-    init(sampleCount: Int) {
+    init(filterBankCount: Int, sampleCount: Int, frequencyRange: ClosedRange<Float>) {
         self.sampleCount = sampleCount
+        self.filterBankCount = filterBankCount
         
         filterBank = MelSpectrogram.makeFilterBank(
-            withFrequencyRange: 75 ... 5_000,// 20 ... 20_000,
+            withFrequencyRange: frequencyRange,
             sampleCount: sampleCount,
-            filterBankCount: MelSpectrogram.filterBankCount)
+            filterBankCount: filterBankCount)
         
-        sgemmResult = UnsafeMutableBufferPointer<Float>.allocate(capacity: MelSpectrogram.filterBankCount)
+        sgemmResult = UnsafeMutableBufferPointer<Float>.allocate(capacity: filterBankCount)
     }
     
     deinit {
@@ -67,14 +68,14 @@ class MelSpectrogram {
             cblas_sgemm(CblasRowMajor,
                         CblasTrans, CblasTrans,
                         1,
-                        Int32(MelSpectrogram.filterBankCount),
+                        Int32(filterBankCount),
                         Int32(sampleCount),
                         1,
                         frequencyDomainValuesPtr.baseAddress,
                         1,
                         filterBank.baseAddress, Int32(sampleCount),
                         0,
-                        sgemmResult.baseAddress, Int32(MelSpectrogram.filterBankCount))
+                        sgemmResult.baseAddress, Int32(filterBankCount))
         }
         
         /// Use linear interpolation to "stretch" the mulitplication result in `sgemmResult` to the number
@@ -84,7 +85,11 @@ class MelSpectrogram {
 //        vDSP.linearInterpolate(values: sgemmResult,
 //                               atIndices: indices,
 //                               result: &values)
-        if sgemmResult.count != values.count {
+        
+        
+        // Linear interpolation makes lower frequency values "fuzzy"
+        // sgemmResult needs to be a multiple of values.count for a proper stride in copy
+        if values.count != sgemmResult.count {
             fatalError("Counts do not match: sgemmResult \(sgemmResult.count), values: \(values.count)")
         }
         cblas_scopy(Int32(values.count), 
@@ -107,7 +112,7 @@ class MelSpectrogram {
         /// that are indices of the `frequencyDomainBuffer`. The indices represent evenly spaced
         /// monotonically incrementing mel frequencies; that is, they're roughly logarithmically spaced as
         /// frequency in hertz.
-        let melFilterBankFrequencies: [Int] = MelSpectrogram.populateMelFilterBankFrequencies(
+        let melFilterBankFrequencies: [Float] = MelSpectrogram.populateMelFilterBankFrequencies(
             withFrequencyRange: frequencyRange,
             sampleCount: sampleCount,
             filterBankCount: filterBankCount)
@@ -126,7 +131,7 @@ class MelSpectrogram {
             let startFrequency = melFilterBankFrequencies[ max(0, i - 1) ]
             let centerFrequency = melFilterBankFrequencies[ i ]
             let endFrequency = (i + 1) < melFilterBankFrequencies.count ?
-            melFilterBankFrequencies[ i + 1 ] : sampleCount - 1
+            melFilterBankFrequencies[ i + 1 ] : Float(sampleCount - 1)
             
             let attackWidth = centerFrequency - startFrequency + 1
             let decayWidth = endFrequency - centerFrequency + 1
@@ -135,7 +140,7 @@ class MelSpectrogram {
             if attackWidth > 0 {
                 vDSP_vgen(&endValue,
                           &baseValue,
-                          filterBank.baseAddress!.advanced(by: row + startFrequency),
+                          filterBank.baseAddress!.advanced(by: row + Int(startFrequency)),
                           1,
                           vDSP_Length(attackWidth))
             }
@@ -144,7 +149,7 @@ class MelSpectrogram {
             if decayWidth > 0 {
                 vDSP_vgen(&baseValue,
                           &endValue,
-                          filterBank.baseAddress!.advanced(by: row + centerFrequency),
+                          filterBank.baseAddress!.advanced(by: row + Int(centerFrequency)),
                           1,
                           vDSP_Length(decayWidth))
             }
@@ -157,7 +162,7 @@ class MelSpectrogram {
     /// of indices into `frequencyDomainBuffer` that represent evenly spaced mels.
     private static func populateMelFilterBankFrequencies(withFrequencyRange frequencyRange: ClosedRange<Float>,
                                                          sampleCount: Int,
-                                                         filterBankCount: Int) -> [Int] {
+                                                         filterBankCount: Int) -> [Float] {
         func frequencyToMel(_ frequency: Float) -> Float {
             return 2595 * log10(1 + (frequency / 700))
         }
@@ -168,13 +173,15 @@ class MelSpectrogram {
         
         let minMel = frequencyToMel(frequencyRange.lowerBound)
         let maxMel = frequencyToMel(frequencyRange.upperBound)
+        
         let bankWidth = (maxMel - minMel) / Float(filterBankCount - 1)
         
-        let melFilterBankFrequencies: [Int] = stride(from: minMel, to: maxMel, by: bankWidth).map {
+        let melFilterBankFrequencies: [Float] = stride(from: minMel, to: maxMel, by: bankWidth).map {
             let mel = Float($0)
             let frequency = melToFrequency(mel)
             
-            return Int((frequency / frequencyRange.upperBound) * Float(sampleCount))
+            let melFrequency = (frequency / frequencyRange.upperBound) * Float(sampleCount)
+            return melFrequency
         }
         return melFilterBankFrequencies
     }

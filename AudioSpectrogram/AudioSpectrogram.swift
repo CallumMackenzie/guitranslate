@@ -12,16 +12,6 @@ import UIKit
 
 class AudioSpectrogram: NSObject, ObservableObject {
     
-    /// An enumeration that specifies the drum loop provider's mode.
-    enum Mode: String, CaseIterable, Identifiable {
-        case linear
-        case mel
-        
-        var id: Self { self }
-    }
-    
-    @Published var mode = Mode.mel
-    
     @Published var gain: Double = 0.038
     @Published var zeroReference: Double = 550
     
@@ -37,7 +27,6 @@ class AudioSpectrogram: NSObject, ObservableObject {
         configureCaptureSession()
         audioOutput.setSampleBufferDelegate(self,
                                             queue: captureQueue)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -46,16 +35,25 @@ class AudioSpectrogram: NSObject, ObservableObject {
     
     // MARK: Properties
     
-    lazy var melSpectrogram = MelSpectrogram(sampleCount: AudioSpectrogram.sampleCount)
-    
     /// The number of samples per frame — the height of the spectrogram.
-    static let sampleCount = 1024
+    static let sampleCount = 1024 * 2
     
     /// The number of displayed buffers — the width of the spectrogram.
     static let bufferCount = 768
     
     /// Determines the overlap between frames.
-    static let hopCount = 512
+    static let hopCount = (sampleCount + 1) / 2
+    
+    // Though guitar frequencies have harmonics reaching 5 kHz, resolution at lower frequencies
+    // is more important for note recognition; harmonic profile not as necessary given we are assuming
+    // we are recording guitar. The note e6 is the highest reasonable guitar note at 1300 Hz so we have
+    // headroom.
+    static let frequencyRange: ClosedRange<Float> = 45 ... 2000
+    
+    lazy var melSpectrogram = MelSpectrogram(
+        filterBankCount: AudioSpectrogram.sampleCount,
+        sampleCount: AudioSpectrogram.sampleCount,
+        frequencyRange: AudioSpectrogram.frequencyRange)
     
     let captureSession = AVCaptureSession()
     let audioOutput = AVCaptureAudioDataOutput()
@@ -160,21 +158,12 @@ class AudioSpectrogram: NSObject, ObservableObject {
         vDSP.absolute(frequencyDomainBuffer,
                       result: &frequencyDomainBuffer)
         
-        switch mode {
-        case .linear:
-            
-            
-            vDSP.convert(amplitude: frequencyDomainBuffer,
-                         toDecibels: &frequencyDomainBuffer,
-                         zeroReference: Float(zeroReference))
-        case .mel:
-            melSpectrogram.computeMelSpectrogram(
-                values: &frequencyDomainBuffer)
-            
-            vDSP.convert(power: frequencyDomainBuffer,
-                         toDecibels: &frequencyDomainBuffer,
-                         zeroReference: Float(zeroReference))
-        }
+        melSpectrogram.computeMelSpectrogram(
+            values: &frequencyDomainBuffer)
+        
+        vDSP.convert(power: frequencyDomainBuffer,
+                     toDecibels: &frequencyDomainBuffer,
+                     zeroReference: Float(zeroReference))
         
         vDSP.multiply(Float(gain),
                       frequencyDomainBuffer,
@@ -194,7 +183,6 @@ class AudioSpectrogram: NSObject, ObservableObject {
     func makePreviewAudioSpectrogramImage() -> CGImage {
         
         frequencyDomainValues.withUnsafeMutableBufferPointer {
-            
             let planarImageBuffer = vImage.PixelBuffer(
                 data: $0.baseAddress! + frequencyDomainOffset,
                 width: AudioSpectrogram.sampleCount,

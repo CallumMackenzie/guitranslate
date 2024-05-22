@@ -48,6 +48,7 @@ extension AudioSpectrogram: AVCaptureAudioDataOutputSampleBufferDelegate {
         ///
         /// The following code creates an array from `data` and appends it to  `rawAudioData`:
         if self.rawAudioData.count < AudioSpectrogram.sampleCount * 2 {
+            /// In practice sample count ~900
             let actualSampleCount = CMSampleBufferGetNumSamples(sampleBuffer)
             
             let pointer = data.bindMemory(to: Int16.self,

@@ -14,6 +14,7 @@
 		BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802529D5E32600C8686A /* AudioSpectrogram.swift */; };
 		BE74802829D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */; };
 		BE74802A29D7051900C8686A /* MelSpectrogram.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE74802929D7051900C8686A /* MelSpectrogram.swift */; };
+		F2118BCF2BFE9AFF00CF453D /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2118BCE2BFE9AFF00CF453D /* Log.swift */; };
 		F28A9E4B2BFABC1100894570 /* SpectrogramRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */; };
 		F28A9E4D2BFAED6A00894570 /* TabEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28A9E4C2BFAED6A00894570 /* TabEditorView.swift */; };
 /* End PBXBuildFile section */
@@ -30,6 +31,8 @@
 		BE74802529D5E32600C8686A /* AudioSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSpectrogram.swift; sourceTree = "<group>"; };
 		BE74802729D5E3A400C8686A /* AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AudioSpectrogram+AVCaptureAudioDataOutputSampleBufferDelegate.swift"; sourceTree = "<group>"; };
 		BE74802929D7051900C8686A /* MelSpectrogram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MelSpectrogram.swift; sourceTree = "<group>"; };
+		F2118BCD2BFE89FA00CF453D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		F2118BCE2BFE9AFF00CF453D /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrogramRecordingView.swift; sourceTree = "<group>"; };
 		F28A9E4C2BFAED6A00894570 /* TabEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabEditorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -48,6 +51,7 @@
 		3EDCF0C22372EFE600637FFF = {
 			isa = PBXGroup;
 			children = (
+				F2118BCD2BFE89FA00CF453D /* README.md */,
 				BE74801529D5DFA900C8686A /* AudioSpectrogram */,
 				3EDCF0CC2372EFE600637FFF /* Products */,
 				B1394AA10D860BC3E367A1A3 /* Configuration */,
@@ -92,6 +96,7 @@
 				BE74801C29D5DFAB00C8686A /* Preview Content */,
 				F28A9E4A2BFABC1100894570 /* SpectrogramRecordingView.swift */,
 				F28A9E4C2BFAED6A00894570 /* TabEditorView.swift */,
+				F2118BCE2BFE9AFF00CF453D /* Log.swift */,
 			);
 			path = AudioSpectrogram;
 			sourceTree = "<group>";
@@ -182,6 +187,7 @@
 				BE74801729D5DFA900C8686A /* GuitranslateApp.swift in Sources */,
 				F28A9E4D2BFAED6A00894570 /* TabEditorView.swift in Sources */,
 				F28A9E4B2BFABC1100894570 /* SpectrogramRecordingView.swift in Sources */,
+				F2118BCF2BFE9AFF00CF453D /* Log.swift in Sources */,
 				BE74802629D5E32600C8686A /* AudioSpectrogram.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
