@@ -117,6 +117,8 @@ class MelSpectrogram {
             sampleCount: sampleCount,
             filterBankCount: filterBankCount)
         
+        Log.info("Filter bank: \(melFilterBankFrequencies.first!)...\(melFilterBankFrequencies.last!) Hz over \(melFilterBankFrequencies.count) steps", ["MelSpectrogram"])
+        
         let capacity = sampleCount * filterBankCount
         let filterBank = UnsafeMutableBufferPointer<Float>.allocate(capacity: capacity)
         filterBank.initialize(repeating: 0)

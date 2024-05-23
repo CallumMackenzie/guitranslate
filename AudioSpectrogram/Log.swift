@@ -11,6 +11,7 @@ import Foundation
 class PrintLogOutput : LogOutput.Loggable {
     var includeFile: Bool = false
     var includeTags: [String] = []
+    var excludeTags: [String] = []
     func log(_ log: Log) {
         print(log.formatOutput(includeFile: includeFile))
     }
@@ -19,6 +20,7 @@ class PrintLogOutput : LogOutput.Loggable {
 class SavedLogOutput : LogOutput.Loggable {
     var includeFile: Bool = false
     var includeTags: [String] = []
+    var excludeTags: [String] = []
     var output = ""
     func log(_ log: Log) {
         output += "\(log.formatOutput(includeFile: includeFile))\n"
@@ -32,6 +34,8 @@ class LogOutput {
         var includeFile: Bool { get set }
         /// Empty array means log all regardless of tags
         var includeTags: [String] { get set }
+        /// Empty array means don't exclude any tags
+        var excludeTags: [String] { get set }
         /// Logging function
         mutating func log(_ log: Log)
     }
@@ -56,7 +60,10 @@ class LogOutput {
         runResourceLocked { [self] in
             for var output in stdouts {
                 for tag in o.tags {
-                    if output.includeTags.isEmpty || output.includeTags.contains(tag) {
+                    let included = output.includeTags.contains(tag)
+                    let excluded = output.excludeTags.contains(tag)
+                    let empty = output.includeTags.isEmpty && output.excludeTags.isEmpty
+                    if empty || (included && !excluded) {
                         output.log(o)
                         return
                     }
@@ -115,7 +122,7 @@ class Log {
     }
     
     func formatOutput(includeFile: Bool) -> String {
-        let tagSegment = tags.count == 0 ? "" : " [\(tags.joined(separator: ","))]"
+        let tagSegment = tags.count == 0 ? "" : " [\(tags.joined(separator: ", "))]"
         let callerSegment = includeFile ? " \(file)" : ""
         return "\(tagSegment)\(callerSegment): \(msg)"
     }

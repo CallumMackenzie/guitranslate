@@ -24,3 +24,4 @@ May 21 2024
 
 May 22 2024
 - Improved spectrogram resolution of lower frequencies
+- Added logging system

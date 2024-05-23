@@ -12,8 +12,8 @@ import UIKit
 
 class AudioSpectrogram: NSObject, ObservableObject {
     
-    @Published var gain: Double = 0.038
-    @Published var zeroReference: Double = 550
+    private var gain: Double = 0.038
+    private var zeroReference: Double = 550
     
     @Published var previewOutputImage = AudioSpectrogram.emptyCGImage
     @Published var fullOutputImage = AudioSpectrogram.emptyCGImage
@@ -25,8 +25,17 @@ class AudioSpectrogram: NSObject, ObservableObject {
         super.init()
         
         configureCaptureSession()
-        audioOutput.setSampleBufferDelegate(self,
-                                            queue: captureQueue)
+        audioOutput.setSampleBufferDelegate(self, queue: captureQueue)
+        
+        Log.info("""
+                 freq range = \(AudioSpectrogram.frequencyRange), \
+                 sample count = \(AudioSpectrogram.sampleCount), \
+                 buffer count = \(AudioSpectrogram.bufferCount) , \
+                 gain = \(gain), \
+                 zero ref = \(zeroReference) \
+                 export rate = \(AudioSpectrogram.dataExportRate)
+                 """,
+                 ["AudioSpectrogram"])
     }
     
     required init?(coder: NSCoder) {
@@ -43,6 +52,10 @@ class AudioSpectrogram: NSObject, ObservableObject {
     
     /// Determines the overlap between frames.
     static let hopCount = (sampleCount + 1) / 2
+    
+    /// Determines after how many samples to process extra data
+    static let dataExportRate = 100
+    var bufferCounter = 0
     
     // Though guitar frequencies have harmonics reaching 5 kHz, resolution at lower frequencies
     // is more important for note recognition; harmonic profile not as necessary given we are assuming
@@ -171,11 +184,57 @@ class AudioSpectrogram: NSObject, ObservableObject {
         
         if frequencyDomainValues.count > AudioSpectrogram.sampleCount {
             frequencyDomainOffset += AudioSpectrogram.sampleCount
+            bufferCounter += 1
+            if bufferCounter >= AudioSpectrogram.dataExportRate {
+                exportData()
+                bufferCounter = 0
+            }
         }
         
         frequencyDomainValues.append(contentsOf: frequencyDomainBuffer)
         DispatchQueue.main.async {
             self.totalRecordingDuration = self.getRecordingDuration()
+        }
+    }
+    
+    func makeSpectrogramImageFromSamples(bufferCount: Int) -> CGImage {
+        return frequencyDomainValues.withUnsafeMutableBufferPointer {
+            let buffCnt = bufferCount
+            let totalBuffs = $0.count / AudioSpectrogram.sampleCount - AudioSpectrogram.bufferCount
+
+            let redBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let greenBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let blueBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let rgbImageBufferLarge = vImage.PixelBuffer<vImage.InterleavedFx3>(
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt)
+            
+            let planarImageBuffer = vImage.PixelBuffer(
+                data: $0.baseAddress! + AudioSpectrogram.bufferCount * AudioSpectrogram.sampleCount
+                + (totalBuffs - buffCnt) * AudioSpectrogram.sampleCount,
+                width: AudioSpectrogram.sampleCount,
+                height: buffCnt,
+                byteCountPerRow: AudioSpectrogram.sampleCount * MemoryLayout<Float>.stride,
+                pixelFormat: vImage.PlanarF.self)
+            
+            AudioSpectrogram.multidimensionalLookupTable.apply(
+                sources: [planarImageBuffer],
+                destinations: [redBufferLarge, greenBufferLarge, blueBufferLarge],
+                interpolation: .half)
+            
+            rgbImageBufferLarge.interleave(planarSourceBuffers: [redBufferLarge, greenBufferLarge, blueBufferLarge])
+            
+            let val = rgbImageBufferLarge.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
+            return val
         }
     }
     
@@ -206,47 +265,17 @@ class AudioSpectrogram: NSObject, ObservableObject {
         self.fullOutputImage = makeFullAudioSpectrogramImage()
     }
     
-    private func makeFullAudioSpectrogramImage() -> CGImage {
-        return frequencyDomainValues.withUnsafeMutableBufferPointer {
-            
-            if self.totalRecordingDuration == Duration.zero {
-                return AudioSpectrogram.emptyCGImage
-            }
-            
-            let buffCnt = $0.count / AudioSpectrogram.sampleCount - AudioSpectrogram.bufferCount
-            
-            let redBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
-                width: AudioSpectrogram.sampleCount,
-                height: buffCnt)
-            
-            let greenBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
-                width: AudioSpectrogram.sampleCount,
-                height: buffCnt)
-            
-            let blueBufferLarge = vImage.PixelBuffer<vImage.PlanarF>(
-                width: AudioSpectrogram.sampleCount,
-                height: buffCnt)
-            
-            let rgbImageBufferLarge = vImage.PixelBuffer<vImage.InterleavedFx3>(
-                width: AudioSpectrogram.sampleCount,
-                height: buffCnt)
-            
-            let planarImageBuffer = vImage.PixelBuffer(
-                data: $0.baseAddress! + AudioSpectrogram.bufferCount * AudioSpectrogram.sampleCount,
-                width: AudioSpectrogram.sampleCount,
-                height: buffCnt,
-                byteCountPerRow: AudioSpectrogram.sampleCount * MemoryLayout<Float>.stride,
-                pixelFormat: vImage.PlanarF.self)
-            
-            AudioSpectrogram.multidimensionalLookupTable.apply(
-                sources: [planarImageBuffer],
-                destinations: [redBufferLarge, greenBufferLarge, blueBufferLarge],
-                interpolation: .half)
-            
-            rgbImageBufferLarge.interleave(planarSourceBuffers: [redBufferLarge, greenBufferLarge, blueBufferLarge])
-            
-            return rgbImageBufferLarge.makeCGImage(cgImageFormat: rgbImageFormat) ?? AudioSpectrogram.emptyCGImage
+    func makeFullAudioSpectrogramImage() -> CGImage {
+        let startDate = Date.now
+        if self.totalRecordingDuration == Duration.zero {
+            return AudioSpectrogram.emptyCGImage
         }
+        let height = frequencyDomainValues.count / AudioSpectrogram.sampleCount - AudioSpectrogram.bufferCount
+        let img = makeSpectrogramImageFromSamples(bufferCount: height)
+        // Log processing time
+        let finishTime = -startDate.timeIntervalSinceNow
+        Log.info("Processing time: \(finishTime) s", ["AudioSpectrogram", "Image"])
+        return img
     }
     
     func clear() {
@@ -257,6 +286,9 @@ class AudioSpectrogram: NSObject, ObservableObject {
         fullOutputImage = AudioSpectrogram.emptyCGImage
         currentRecordingSegmentDuration = Duration.zero
         totalRecordingDuration = Duration.zero
+        bufferCounter = 0
+        
+        Log.info("Cleared", ["AudioSpectrogram"])
     }
     
     /// Starts and stops the audio spectrogram.
@@ -268,12 +300,14 @@ class AudioSpectrogram: NSObject, ObservableObject {
                         self.lastRecordingStart = Date.now
                     }
                     self.captureSession.startRunning()
+                    Log.info("Started", ["AudioSpectrogram"])
                 } else  {
                     DispatchQueue.main.async {
                         self.currentRecordingSegmentDuration = self.getRecordingDuration()
                         self.updateFullAudioSpectrogramImage()
                     }
                     self.captureSession.stopRunning()
+                    Log.info("Stopped", ["AudioSpectrogram"])
                 }
             }
         }
@@ -288,6 +322,10 @@ class AudioSpectrogram: NSObject, ObservableObject {
         } else {
             return self.currentRecordingSegmentDuration
         }
+    }
+    
+    private func exportData() {
+        Log.info("Exporting data ...", ["AudioSpectrogram"])
     }
     
 }
